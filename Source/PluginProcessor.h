@@ -54,11 +54,19 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    // Parameter accessors
+    juce::AudioParameterFloat* getExcitationTimeParam() { return excitationTimeParam; }
+    juce::AudioParameterFloat* getBrightnessParam() { return brightnessParam; }
+    juce::AudioParameterFloat* getPluckPositionParam() { return pluckPositionParam; }
+
+
 private:
     Guitar guitar;
-    AudioParameterFloat* mExcitationTimeParameter;
-    AudioParameterFloat* mBrightnessParameter;
-    AudioParameterFloat* mPluckPositionParameter;
+    
+    juce::AudioParameterFloat* excitationTimeParam = nullptr;
+    juce::AudioParameterFloat* brightnessParam = nullptr;
+    juce::AudioParameterFloat* pluckPositionParam = nullptr;
+    
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GuitarObjectAudioProcessor)
 };

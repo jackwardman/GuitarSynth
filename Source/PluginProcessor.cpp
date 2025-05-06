@@ -11,36 +11,29 @@
 
 //==============================================================================
 GuitarObjectAudioProcessor::GuitarObjectAudioProcessor()
+    : AudioProcessor (
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::mono(), true)
-                     #endif
-                       )
+        BusesProperties()
+        #if ! JucePlugin_IsMidiEffect
+         #if ! JucePlugin_IsSynth
+          .withInput  ("Input",  juce::AudioChannelSet::mono(), true)
+         #endif
+          .withOutput ("Output", juce::AudioChannelSet::mono(), true)
+        #endif
 #endif
+      )
 {
-    //    Define user controlable parameters with ranges
-    addParameter(mExcitationTimeParameter = new AudioParameterFloat("excitationtime",
-                                                            "Excitation Time",
-                                                            1.f,
-                                                            10.f,
-                                                            5.f));
+    addParameter(excitationTimeParam = new juce::AudioParameterFloat(
+            juce::ParameterID("excitationtime", 2), "Excitation Time",
+            juce::NormalisableRange<float>(1.0f, 10.0f), 5.0f, "ms"));
 
-    
-    addParameter(mBrightnessParameter = new AudioParameterFloat("brightness",
-                                                           "Brightness",
-                                                           0.f,
-                                                           1.f,
-                                                           0.25f));
-    
-    addParameter(mPluckPositionParameter = new AudioParameterFloat("pluckposition",
-                                                           "Pluck Position",
-                                                           0.f,
-                                                           1.f,
-                                                           0.2f));
+        addParameter(brightnessParam = new juce::AudioParameterFloat(
+            juce::ParameterID("brightness", 2), "Brightness",
+            juce::NormalisableRange<float>(0.0f, 1.0f), 0.25f, "%"));
+
+        addParameter(pluckPositionParam = new juce::AudioParameterFloat(
+            juce::ParameterID("pluckposition", 2), "Pluck Position",
+            juce::NormalisableRange<float>(0.0f, 1.0f), 0.2f, "%"));
 }
 
 GuitarObjectAudioProcessor::~GuitarObjectAudioProcessor()
@@ -139,44 +132,32 @@ void GuitarObjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
-    
+
     float* channelData = buffer.getWritePointer(0);
-    
+
+    float excitationTime = excitationTimeParam->get();
+    float brightness = brightnessParam->get();
+    float pluckPosition = pluckPositionParam->get();
+
+    int pitchBend = 0;
+
+    for (const auto metadata : midiMessages)
+    {
+        auto m = metadata.getMessage();
+        if (m.isNoteOn())
+            guitar.startNote(juce::MidiMessage::getMidiNoteInHertz(m.getNoteNumber()), m.getFloatVelocity());
+        else if (m.isNoteOff())
+            guitar.stopNote(juce::MidiMessage::getMidiNoteInHertz(m.getNoteNumber()));
+    }
+
     for (int i = 0; i < buffer.getNumSamples(); i++)
     {
-        int pitchBend;
-        for (const auto metadata : midiMessages)
-        {
-            // grab the metadata from that message
-            auto m = metadata.getMessage();
-            // if midi message note on is called, reset lastMidiMessage to 0 to trigger
-            if (m.isNoteOn() == true)
-            {
-                guitar.startNote(MidiMessage::getMidiNoteInHertz(m.getNoteNumber()), m.getFloatVelocity());
-            }
-            else if (m.isNoteOff() == true)
-            {
-                guitar.stopNote(MidiMessage::getMidiNoteInHertz(m.getNoteNumber()));
-            }
-//            else if (m.isPitchWheel() == true)
-//            {
-//                pitchBend = m.getPitchWheelValue();
-//                DBG(pitchBend);
-//            }
-        }
-        channelData[i] = guitar.renderSample(*mExcitationTimeParameter, *mBrightnessParameter, *mPluckPositionParameter, pitchBend);
+        channelData[i] = guitar.renderSample(excitationTime, brightness, pluckPosition, pitchBend);
     }
 
     guitar.applyConvolution(buffer);
-    
 }
 
 //==============================================================================
@@ -193,21 +174,21 @@ juce::AudioProcessorEditor* GuitarObjectAudioProcessor::createEditor()
 //==============================================================================
 void GuitarObjectAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    std::unique_ptr<XmlElement> xml(new XmlElement("GuitarSynth"));
-    xml-> setAttribute("excitationtime", *mExcitationTimeParameter);
-    xml->setAttribute("brightness", *mBrightnessParameter);
-    xml->setAttribute("pluckposition", *mPluckPositionParameter);
-    
-    copyXmlToBinary(*xml, destData);
+    juce::XmlElement xml("PARAMETERS");
+    xml.setAttribute("excitationtime", excitationTimeParam->get());
+    xml.setAttribute("brightness", brightnessParam->get());
+    xml.setAttribute("pluckposition", pluckPositionParam->get());
+    copyXmlToBinary(xml, destData);
 }
 
 void GuitarObjectAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    std::unique_ptr<XmlElement> xml(getXmlFromBinary(data, sizeInBytes));
-    if (xml.get() != nullptr && xml->hasTagName("GuitarSynth")) {
-        *mExcitationTimeParameter = xml->getDoubleAttribute("excitationtime");
-        *mBrightnessParameter = xml->getDoubleAttribute("brightness");
-        *mPluckPositionParameter = xml->getDoubleAttribute("pluckposition");
+    std::unique_ptr<juce::XmlElement> xml(getXmlFromBinary(data, sizeInBytes));
+    if (xml && xml->hasTagName("PARAMETERS"))
+    {
+        excitationTimeParam->setValueNotifyingHost((float)xml->getDoubleAttribute("excitationtime", 5.0f));
+        brightnessParam->setValueNotifyingHost((float)xml->getDoubleAttribute("brightness", 0.25f));
+        pluckPositionParam->setValueNotifyingHost((float)xml->getDoubleAttribute("pluckposition", 0.2f));
     }
 }
 

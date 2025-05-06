@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="YV5dMZ" name="GuitarObject" projectType="audioplug" useAppConfig="0"
+<JUCERPROJECT id="YV5dMZ" name="GuitarSynth" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" displaySplashScreen="1" jucerFormatVersion="1"
               pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              pluginManufacturer="ThePlug" pluginManufacturerCode="_PLG" pluginChannelConfigs="{1,1}">
-  <MAINGROUP id="ao8JZ0" name="GuitarObject">
+              pluginManufacturer="ThePlug" pluginManufacturerCode="_PLG" pluginChannelConfigs="{1,1}"
+              pluginFormats="buildVST3">
+  <MAINGROUP id="ao8JZ0" name="GuitarSynth">
     <GROUP id="{E2EFE662-C2C8-AD63-C1D1-50E2095436D3}" name="Source">
       <FILE id="t0w6FY" name="Guitar.cpp" compile="1" resource="0" file="Source/Guitar.cpp"/>
       <FILE id="SiuPSX" name="Guitar.h" compile="0" resource="0" file="Source/Guitar.h"/>

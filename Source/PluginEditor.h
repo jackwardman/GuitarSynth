@@ -29,6 +29,11 @@ private:
     Slider mBrightnessSlider;
     Slider mPluckPositionSlider;
     
+    std::unique_ptr<juce::SliderParameterAttachment> excitationTimeAttachment;
+    std::unique_ptr<juce::SliderParameterAttachment> brightnessAttachment;
+    std::unique_ptr<juce::SliderParameterAttachment> pluckPositionAttachment;
+
+    
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     GuitarObjectAudioProcessor& audioProcessor;

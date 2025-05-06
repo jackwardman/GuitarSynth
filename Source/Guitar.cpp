@@ -20,7 +20,7 @@ void Guitar::initialise(double sampleRate, int samplesPerBlock)
     }
     mSampleRate = sampleRate;
         
-    impulseResponse = ("/Users/jackwardman/Juce/GuitarObject/IR/IR Guitar - Classical - AmBu2F - AKG CS1000.wav");
+    impulseResponse = ("/Users/jackwardman/Documents/JuceProjects/GuitarSynth/IR/IR Guitar - Classical - AmBu2F - AKG CS1000.wav");
     // Initialise for convolution with the impulse response
     spec.sampleRate = sampleRate;
     spec.numChannels = 1;
@@ -36,55 +36,55 @@ void Guitar::startNote(float noteFreq, float velocity)
     if (noteFreq < 800 && noteFreq >= 328) {
         // reset the phase and last midi message variables to trigger the note
         strings[0].startNote(noteFreq, velocity);
-        if (strings[0].mFeedback != 0.999)
-            strings[0].mFeedback = 0.999;
+        if (strings[0].mFeedback != 0.999f)
+            strings[0].mFeedback = 0.999f;
     //  string 2
     } else if (noteFreq < 328 && noteFreq >= 245) {
         strings[1].startNote(noteFreq, velocity);
-        if (strings[1].mFeedback != 0.997)
-            strings[1].mFeedback = 0.997;
+        if (strings[1].mFeedback != 0.997f)
+            strings[1].mFeedback = 0.997f;
     //  string 3
     } else if (noteFreq < 245 && noteFreq >= 195) {
         strings[2].startNote(noteFreq, velocity);
-        if (strings[2].mFeedback != 0.995)
-            strings[2].mFeedback = 0.995;
+        if (strings[2].mFeedback != 0.995f)
+            strings[2].mFeedback = 0.995f;
     //  string 4
     } else if (noteFreq < 195 && noteFreq >= 145) {
         strings[3].startNote(noteFreq, velocity);
-        if (strings[3].mFeedback != 0.993)
-            strings[3].mFeedback = 0.993;
+        if (strings[3].mFeedback != 0.993f)
+            strings[3].mFeedback = 0.993f;
     //  string 5
     } else if (noteFreq < 145 && noteFreq >= 109) {
         strings[4].startNote(noteFreq, velocity);
-        if (strings[4].mFeedback != 0.992)
-            strings[4].mFeedback = 0.992;
+        if (strings[4].mFeedback != 0.992f)
+            strings[4].mFeedback = 0.992f;
     //  string 6
     } else if (noteFreq < 109 && noteFreq >= 81) {
         strings[5].startNote(noteFreq, velocity);
-        if (strings[5].mFeedback != 0.992)
-            strings[5].mFeedback = 0.992;
+        if (strings[5].mFeedback != 0.992f)
+            strings[5].mFeedback = 0.992f;
     }
 }
 
 void Guitar::stopNote(float noteFreq)
 {
     if (noteFreq < 800 && noteFreq >= 328) {
-        strings[0].mFeedback = 0.995;
+        strings[0].mFeedback = 0.995f;
     //  string 2
     } else if (noteFreq < 328 && noteFreq >= 245) {
-        strings[1].mFeedback = 0.992;
+        strings[1].mFeedback = 0.992f;
     //  string 3
     } else if (noteFreq < 245 && noteFreq >= 195) {
-        strings[2].mFeedback = 0.99;
+        strings[2].mFeedback = 0.99f;
     //  string 4
     } else if (noteFreq < 195 && noteFreq >= 145) {
-        strings[3].mFeedback = 0.99;
+        strings[3].mFeedback = 0.99f;
     //  string 5
     } else if (noteFreq < 145 && noteFreq >= 109) {
-        strings[4].mFeedback = 0.99;
+        strings[4].mFeedback = 0.99f;
     //  string 6
     } else if (noteFreq < 109 && noteFreq >= 81) {
-        strings[5].mFeedback = 0.985;
+        strings[5].mFeedback = 0.985f;
     }
 }
 
